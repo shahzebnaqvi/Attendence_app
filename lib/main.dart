@@ -1,208 +1,100 @@
-import 'dart:async';
 import 'dart:io';
+import 'package:attendence/home.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+
 import 'package:flutter/services.dart';
 import 'package:mac_address/mac_address.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const HomePage());
+  runApp(const MyApp());
 }
 
-var macaddress = '';
-var macaddress1 = '';
-var mylocation = '';
-
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
-
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-  Map<String, dynamic> _deviceData = <String, dynamic>{};
-
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-    getCurrentLocation();
-  }
-
-  Future getCurrentLocation() async {
-    try {
-      Geolocator geolocator = Geolocator()..forceAndroidLocationManager = true;
-
-      Position position = await Geolocator().getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best,
-      );
-      print(position);
-      return position;
-      // return 'a';
-    } catch (err) {
-      // print(err.message);
-    }
-  }
-
-  Future<void> initPlatformState() async {
-    var deviceData = <String, dynamic>{};
-
-    try {
-      if (Platform.isAndroid) {
-        deviceData = _readAndroidBuildData(await deviceInfoPlugin.androidInfo);
-      } else if (Platform.isIOS) {
-        deviceData = _readIosDeviceInfo(await deviceInfoPlugin.iosInfo);
-      }
-    } on PlatformException {
-      deviceData = <String, dynamic>{
-        'Error:': 'Failed to get platform version.'
-      };
-    }
-    macaddress = await GetMac.macAddress;
-
-    if (!mounted) return;
-
-    setState(() {
-      _deviceData = deviceData;
-      macaddress1 = macaddress;
-    });
-  }
-
-  Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
-    return <String, dynamic>{
-      'version.securityPatch': build.version.securityPatch,
-      'version.sdkInt': build.version.sdkInt,
-      'version.release': build.version.release,
-      'version.previewSdkInt': build.version.previewSdkInt,
-      'version.incremental': build.version.incremental,
-      'version.codename': build.version.codename,
-      'version.baseOS': build.version.baseOS,
-      'board': build.board,
-      'bootloader': build.bootloader,
-      'brand': build.brand,
-      'device': build.device,
-      'display': build.display,
-      'fingerprint': build.fingerprint,
-      'hardware': build.hardware,
-      'host': build.host,
-      'id': build.id,
-      'manufacturer': build.manufacturer,
-      'model': build.model,
-      'product': build.product,
-      'supported32BitAbis': build.supported32BitAbis,
-      'supported64BitAbis': build.supported64BitAbis,
-      'supportedAbis': build.supportedAbis,
-      'tags': build.tags,
-      'type': build.type,
-      'isPhysicalDevice': build.isPhysicalDevice,
-      'androidId': build.androidId,
-      'systemFeatures': build.systemFeatures,
-    };
-  }
-
-  Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
-    return <String, dynamic>{
-      'name': data.name,
-      'systemName': data.systemName,
-      'systemVersion': data.systemVersion,
-      'model': data.model,
-      'localizedModel': data.localizedModel,
-      'identifierForVendor': data.identifierForVendor,
-      'isPhysicalDevice': data.isPhysicalDevice,
-      'utsname.sysname:': data.utsname.sysname,
-      'utsname.nodename:': data.utsname.nodename,
-      'utsname.release:': data.utsname.release,
-      'utsname.version:': data.utsname.version,
-      'utsname.machine:': data.utsname.machine,
-    };
-  }
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            Platform.isAndroid
-                ? 'Android Device Info'
-                : Platform.isIOS
-                    ? 'iOS Device Info'
-                    : '',
-          ),
-        ),
-        body: Column(
+    return MaterialApp(debugShowCheckedModeBanner: false, home: Login());
+  }
+}
+
+final TextEditingController phone_controller = TextEditingController();
+var phonenum = '';
+
+class Login extends StatelessWidget {
+  const Login({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Center(
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('{$macaddress} $getCurrentLocation(){$macaddress1} '),
-            Expanded(
-              child: ListView(
-                children: _deviceData.keys.map(
-                  (String property) {
-                    return Row(
-                      children: <Widget>[
-                        Container(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Text(
-                            property,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                            child: Container(
-                          padding:
-                              const EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
-                          child: Text(
-                            '${_deviceData[property]}',
-                            maxLines: 10,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        )),
-                      ],
-                    );
-                  },
-                ).toList(),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 60.0),
+              child: Text(
+                "Attendence System",
+                style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold),
               ),
             ),
-            ElevatedButton(
-                onPressed: () {
-                  // initPlatformState();
-                  // getCurrentLocation().then((value) {
-                  //   print("aasmom omoas$value");
-                  //   setState(() {
-                  //     mylocation = value;
-                  //   });
-                  // });
-                  showDialog(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                            title: const Text("My Attendance"),
-                            content: const Text(
-                                "You have raised a Alert Dialog Box"),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(ctx).pop();
-                                },
-                                child: Container(
-                                  color: Colors.green,
-                                  padding: const EdgeInsets.all(14),
-                                  child: const Text("okay"),
-                                ),
-                              ),
-                            ],
-                          ),
-                      4);
-                },
-                child: Text('Check IN'))
+            Textinput(context, Colors.blue, Colors.grey[100], Colors.blue,
+                'Enter Mobile Number', phone_controller, Icon(Icons.phone)),
+            // TextField(
+            //   controller: phone_controller,
+            // ),
+            Container(
+                width: MediaQuery.of(context).size.width,
+                margin: EdgeInsets.only(top: 20.0),
+                child: ElevatedButton(
+                    onPressed: () {
+                      phonenum = phone_controller.text;
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => HomePage(phone: phonenum)));
+                    },
+                    child: Text('Login')))
           ],
         ),
       ),
-    );
+    ));
   }
+}
+
+TextField Textinput(BuildContext context, textFieldfont, textFieldback,
+    fontSecondary, hinttext, controller_field, Icon prefixiconname) {
+  var theme = Theme.of(context).textTheme;
+  return TextField(
+    keyboardType: TextInputType.phone,
+    controller: controller_field,
+    style: theme.bodyText1!.copyWith(
+        color: textFieldfont,
+        // fontSize: MediaQuery.of(context).size.height * 0.02,
+        fontSize: 13,
+        fontWeight: FontWeight.w500),
+    decoration: InputDecoration(
+        prefixIcon: prefixiconname,
+        focusColor: Colors.blue,
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide.none),
+        filled: true,
+        fillColor: textFieldback,
+        // border: UnderlineInputBorder(borderSide: BorderSide.none),
+        hintText: hinttext,
+        contentPadding: EdgeInsets.all(15),
+        hintStyle: theme.bodyText2!.copyWith(
+            color: fontSecondary,
+            // fontSize: MediaQuery.of(context).size.height * 0.032,
+            fontSize: 13,
+            fontWeight: FontWeight.w500)),
+  );
 }
